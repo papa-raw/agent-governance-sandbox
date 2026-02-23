@@ -75,6 +75,11 @@ export function GovernanceTimeline({ history, failureModes }: Props) {
             </span>
           </div>
           <CommonsBar history={history} />
+          {history[history.length - 1]?.cid && (
+            <div className="text-[9px] text-[var(--commons-teal)] font-mono mt-1 truncate" title={history[history.length - 1].cid}>
+              CID: {history[history.length - 1].cid}
+            </div>
+          )}
         </div>
       )}
     </div>

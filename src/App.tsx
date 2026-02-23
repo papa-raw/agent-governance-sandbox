@@ -11,6 +11,7 @@ import { GOVERNANCE_PRESETS } from './engine/governance/presets';
 import { buildTerritoryFromGeoJSON } from './engine/territory';
 import { generateLLMActions, clearPromptCache } from './engine/llm/runtime';
 import { isLLMAvailable } from './engine/llm/client';
+import { storeRoundState, isStorachaConnected } from './engine/storage/storacha';
 import camargueData from './data/camargue.json';
 
 function App() {
@@ -35,7 +36,14 @@ function App() {
     setIsRunning(true);
 
     const actions = await generateLLMActions(simulation, generateDeterministicActions);
-    const { state } = executeRound(simulation, actions);
+    const { state, result } = executeRound(simulation, actions);
+
+    // Compute CID for this round's state (async, non-blocking)
+    storeRoundState(result).then((cid) => {
+      result.cid = cid;
+      setSimulation((prev) => prev ? { ...prev } : prev);
+    });
+
     setSimulation(state);
     setIsRunning(false);
   };
@@ -54,8 +62,11 @@ function App() {
       if (currentState.status === 'completed' || currentState.status === 'collapsed') break;
 
       const actions = await generateLLMActions(currentState, generateDeterministicActions);
-      const { state } = executeRound(currentState, actions);
+      const { state, result } = executeRound(currentState, actions);
       currentState = state;
+
+      // Compute CID (fire-and-forget during batch run)
+      storeRoundState(result).then((cid) => { result.cid = cid; });
 
       setSimulation({ ...currentState });
       await new Promise((r) => setTimeout(r, isLLMAvailable() ? 500 : 100));
@@ -133,6 +144,10 @@ function App() {
         <span>
           Agents: {simulation?.agents.filter((a) => !a.excluded).length ?? 0} active
           {' '}({isLLMAvailable() ? 'LLM' : 'deterministic'})
+        </span>
+        <span>
+          Storage: {isStorachaConnected() ? 'Storacha' : 'local CID'}
+          {simulation?.history.length ? ` (${simulation.history.filter((r) => r.cid).length} hashed)` : ''}
         </span>
       </footer>
     </div>
