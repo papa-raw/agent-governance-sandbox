@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@import "maplibre-gl/dist/maplibre-gl.css";
+
+:root {
+  /* Design system colors from governance viz spec */
+  --bg-base: #0F1419;
+  --bg-surface: #1A2332;
+  --bg-elevated: #243042;
+  --text-primary: #E8ECF1;
+  --text-secondary: #8899AA;
+  --border: #2D3F52;
+
+  --governance-green: #2ECC71;
+  --warning-amber: #F39C12;
+  --danger-red: #E74C3C;
+  --critical-pulse: #FF1744;
+  --info-blue: #3498DB;
+  --sacred-purple: #9B59B6;
+  --stake-gold: #F1C40F;
+  --commons-teal: #1ABC9C;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
