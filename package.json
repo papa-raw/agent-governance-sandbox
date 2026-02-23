@@ -20,6 +20,7 @@
     "react-map-gl": "^8.1.0",
     "react-resizable-panels": "^4.6.5",
     "recharts": "^3.7.0",
+    "shamir-secret-sharing": "^0.0.4",
     "uuid": "^13.0.0",
     "vite-plugin-node-polyfills": "^0.25.0",
     "zod": "^4.3.6"
