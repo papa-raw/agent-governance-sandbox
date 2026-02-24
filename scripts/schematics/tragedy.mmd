@@ -1,0 +1,22 @@
+graph TB
+    A1["🌾 Agent 1"]:::agent --> C["Commons Pool"]:::commons
+    A2["🐄 Agent 2"]:::agent --> C
+    A3["🧂 Agent 3"]:::agent --> C
+    A4["🎣 Agent 4"]:::agent --> C
+    AN["... Agent N"]:::agent --> C
+
+    C --> D["Depletion"]:::danger
+    D --> COL["💀 COLLAPSE"]:::collapse
+
+    linkStyle 0 stroke:#E74C3C,stroke-width:2px
+    linkStyle 1 stroke:#E74C3C,stroke-width:2px
+    linkStyle 2 stroke:#E74C3C,stroke-width:2px
+    linkStyle 3 stroke:#E74C3C,stroke-width:2px
+    linkStyle 4 stroke:#E74C3C,stroke-width:2px
+    linkStyle 5 stroke:#E74C3C,stroke-width:3px
+    linkStyle 6 stroke:#E74C3C,stroke-width:4px
+
+    classDef agent fill:#243042,stroke:#E74C3C,color:#E8ECF1,stroke-width:1px
+    classDef commons fill:#1A2332,stroke:#8899AA,color:#E8ECF1,stroke-width:2px
+    classDef danger fill:#E74C3C22,stroke:#E74C3C,color:#E74C3C,stroke-width:2px
+    classDef collapse fill:#E74C3C44,stroke:#E74C3C,color:#E74C3C,stroke-width:3px

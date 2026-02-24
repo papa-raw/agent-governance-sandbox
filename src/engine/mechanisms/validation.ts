@@ -67,16 +67,13 @@ function validateConsume(
     };
   }
 
-  // Check if target zones have enough resources
-  const targetZones = action.targetZones ?? [];
-  for (const zoneId of targetZones) {
-    const zone = state.commons.territory.zones.find((z) => z.id === zoneId);
-    if (!zone) {
-      return { valid: false, reason: `Zone ${zoneId} not found` };
-    }
-    if (zone.steward !== agent.id && zone.steward !== 'commons') {
-      return { valid: false, reason: `Agent does not steward zone ${zoneId}` };
-    }
+  // Filter target zones to only valid ones (LLM may reference invalid IDs)
+  // Instead of rejecting the whole action, just strip invalid zones
+  if (action.targetZones) {
+    action.targetZones = action.targetZones.filter((zoneId) => {
+      const zone = state.commons.territory.zones.find((z) => z.id === zoneId);
+      return zone && (zone.steward === agent.id || zone.steward === 'commons');
+    });
   }
 
   // Check total commons resources

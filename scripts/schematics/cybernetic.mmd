@@ -1,0 +1,68 @@
+graph TB
+    subgraph ENTRY["Dual-Gated Entry"]
+        STAKE["🏦 Stake Gate<br/>Min 30 Resources"]:::stake
+        REP["⭐ Reputation Gate<br/>≥40 to Propose"]:::rep
+    end
+
+    subgraph DELIBERATION["Multistage Deliberation"]
+        D1["1 — Straw Poll"]:::delib
+        D2["2 — Deliberation"]:::delib
+        D3["3 — Binding Vote"]:::delib
+        D1 --> D2 --> D3
+    end
+
+    subgraph QUADRATIC["Quadratic Voting"]
+        QV["√stake = votes<br/>Threshold-Disclosure Ballots"]:::quad
+    end
+
+    subgraph ORACLE["Ecological Oracle"]
+        ECO["📊 Ecosystem Metrics<br/>Health • Biodiversity • Stock"]:::oracle
+        ENFORCE["⚡ Algorithmic Enforcement"]:::enforce
+        ECO -->|"trigger"| ENFORCE
+    end
+
+    subgraph SANCTIONS["Graduated Response"]
+        W["⚠ Warning"]:::warn
+        P["💸 Penalty + Slash 15%"]:::penalize
+        SU["⏸ Suspension"]:::suspend
+        EX["🚫 Exclusion"]:::exclude
+        W --> P --> SU --> EX
+    end
+
+    A1["🌿 Stakeholders"]:::agent
+    COMMONS["Camargue Commons"]:::commons
+
+    A1 -->|"stake + register"| STAKE
+    A1 -->|"earn standing"| REP
+    REP -->|"propose"| D1
+    D3 -->|"ratify"| QV
+    QV -->|"enact rules"| COMMONS
+    COMMONS -->|"state signals"| ECO
+    ENFORCE -->|"graduated"| SANCTIONS
+    SANCTIONS -.->|"feedback"| A1
+    A1 <-->|"extract · contribute"| COMMONS
+
+    linkStyle 0 stroke:#1ABC9C,stroke-width:1px
+    linkStyle 1 stroke:#1ABC9C,stroke-width:1px
+    linkStyle 2 stroke:#9B59B6,stroke-width:2px
+    linkStyle 3 stroke:#9B59B6,stroke-width:2px
+    linkStyle 4 stroke:#F1C40F,stroke-width:2px
+    linkStyle 5 stroke:#3498DB,stroke-width:2px
+    linkStyle 6 stroke:#1ABC9C,stroke-width:2px
+    linkStyle 7 stroke:#3498DB,stroke-width:2px
+    linkStyle 8 stroke:#E74C3C,stroke-width:2px
+    linkStyle 9 stroke:#E74C3C,stroke-width:1px
+    linkStyle 10 stroke:#1ABC9C,stroke-width:2px
+
+    classDef stake fill:#F1C40F22,stroke:#F1C40F,color:#F1C40F,stroke-width:2px
+    classDef rep fill:#9B59B622,stroke:#9B59B6,color:#9B59B6,stroke-width:2px
+    classDef delib fill:#243042,stroke:#9B59B6,color:#E8ECF1,stroke-width:1px
+    classDef quad fill:#243042,stroke:#F1C40F,color:#E8ECF1,stroke-width:2px
+    classDef oracle fill:#3498DB22,stroke:#3498DB,color:#3498DB,stroke-width:2px
+    classDef enforce fill:#243042,stroke:#3498DB,color:#E8ECF1,stroke-width:2px
+    classDef warn fill:#F1C40F22,stroke:#F1C40F,color:#F1C40F,stroke-width:1px
+    classDef penalize fill:#E74C3C22,stroke:#E74C3C,color:#E74C3C,stroke-width:1px
+    classDef suspend fill:#E74C3C33,stroke:#E74C3C,color:#E74C3C,stroke-width:1px
+    classDef exclude fill:#E74C3C44,stroke:#E74C3C,color:#E74C3C,stroke-width:2px
+    classDef agent fill:#1ABC9C22,stroke:#1ABC9C,color:#1ABC9C,stroke-width:2px
+    classDef commons fill:#1A2332,stroke:#1ABC9C,color:#1ABC9C,stroke-width:2px

@@ -17,7 +17,7 @@ export function regenerateTerritory(territory: Territory): Territory {
       .filter((z): z is NonNullable<typeof z> => z != null);
 
     const neighborHealthAvg = neighbors.length > 0
-      ? neighbors.reduce((sum, n) => sum + n.resourceLevel / n.maxCapacity, 0) / neighbors.length
+      ? neighbors.reduce((sum, n) => sum + n.resourceLevel / Math.max(n.maxCapacity, 1), 0) / neighbors.length
       : 0.5; // Default to moderate if no neighbors
 
     // Base regeneration modified by neighbor health

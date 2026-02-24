@@ -21,22 +21,26 @@ export async function generateLLMActions(
   }
 
   const activeAgents = state.agents.filter((a) => !a.excluded && !a.suspended);
-  const results = await Promise.allSettled(
-    activeAgents.map((agent) => generateAgentAction(agent, state)),
-  );
-
-  const actions: AgentAction[] = [];
   const fallbackActions = deterministicFallback(state);
+  const actions: AgentAction[] = [];
 
-  for (let i = 0; i < results.length; i++) {
-    const result = results[i];
-    if (result.status === 'fulfilled' && result.value) {
-      actions.push(result.value);
-    } else {
-      // Fall back to deterministic for this agent
-      const agentId = activeAgents[i].id;
-      const fallback = fallbackActions.find((a) => a.agentId === agentId);
+  // Sequential calls with delay to avoid 429 rate limits
+  for (const agent of activeAgents) {
+    try {
+      const action = await generateAgentAction(agent, state);
+      if (action) {
+        actions.push(action);
+      } else {
+        const fallback = fallbackActions.find((a) => a.agentId === agent.id);
+        if (fallback) actions.push(fallback);
+      }
+    } catch {
+      const fallback = fallbackActions.find((a) => a.agentId === agent.id);
       if (fallback) actions.push(fallback);
+    }
+    // Small delay between calls to stay under rate limits
+    if (activeAgents.length > 3) {
+      await new Promise((r) => setTimeout(r, 150));
     }
   }
 
@@ -103,6 +107,20 @@ function parseAndValidateAction(
 
     // Add agentId and validate
     const withId = { ...actionObj, agentId: agent.id };
+
+    // Sanitize targetZones — LLM may return zone names instead of UUIDs; strip them
+    if (withId.targetZones && Array.isArray(withId.targetZones)) {
+      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
+      const validZones = withId.targetZones.filter((z: string) => uuidPattern.test(z));
+      withId.targetZones = validZones.length > 0 ? validZones : undefined;
+    }
+
+    // Convert propose_rule to abstain if no proper proposal object
+    if (withId.type === 'propose_rule' && !withId.proposal) {
+      withId.type = 'abstain';
+      withId.reasoning = withId.reasoning || 'Considered proposing a rule change but held off.';
+    }
+
     const validated = AgentActionSchema.parse(withId);
 
     // Enforce authority bounds
@@ -114,7 +132,6 @@ function parseAndValidateAction(
     }
 
     if (validated.type === 'propose_rule' && !agent.delegationConfig.authorityBounds.canPropose) {
-      // Agent tried to propose but isn't allowed — convert to abstain
       return {
         agentId: agent.id,
         type: 'abstain',

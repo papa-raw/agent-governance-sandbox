@@ -1,0 +1,49 @@
+graph TB
+    subgraph INST["Institutional Framework"]
+        BR["🛡 Boundary Rules"]:::institution
+        MON["👁 Monitoring"]:::institution
+        GS["⚖ Graduated Sanctions"]:::institution
+        CC["🗳 Collective Choice"]:::institution
+    end
+
+    subgraph SANCTIONS["Sanction Levels"]
+        W["⚠ Warning"]:::warn
+        P["💰 Penalty"]:::penalty
+        S["⏸ Suspension"]:::suspend
+        E["🚫 Exclusion"]:::exclude
+    end
+
+    subgraph AGENTS["Stakeholder Agents"]
+        AG["🌾🐄🧂🎣 Agents"]:::agent
+    end
+
+    COM["Commons Pool"]:::commons
+
+    BR -->|"register"| AG
+    AG -->|"extract"| COM
+    AG -->|"contribute"| COM
+    MON -->|"observe"| AG
+    MON -->|"violation?"| GS
+    GS --> W --> P --> S --> E
+    CC -->|"🔐 Lit Protocol\nencrypted ballots"| INST
+    AG -->|"vote / propose"| CC
+
+    linkStyle 0 stroke:#1ABC9C,stroke-width:2px
+    linkStyle 1 stroke:#E74C3C,stroke-width:2px
+    linkStyle 2 stroke:#2ECC71,stroke-width:2px
+    linkStyle 3 stroke:#1ABC9C,stroke-width:2px
+    linkStyle 4 stroke:#F1C40F,stroke-width:2px
+    linkStyle 5 stroke:#F1C40F,stroke-width:1px
+    linkStyle 6 stroke:#F1C40F,stroke-width:1px
+    linkStyle 7 stroke:#E74C3C,stroke-width:1px
+    linkStyle 8 stroke:#E74C3C,stroke-width:1px
+    linkStyle 9 stroke:#9B59B6,stroke-width:2px
+    linkStyle 10 stroke:#1ABC9C,stroke-width:2px
+
+    classDef institution fill:#1ABC9C22,stroke:#1ABC9C,color:#1ABC9C,stroke-width:2px
+    classDef agent fill:#243042,stroke:#2D3F52,color:#E8ECF1,stroke-width:2px
+    classDef commons fill:#1A2332,stroke:#1ABC9C,color:#E8ECF1,stroke-width:2px
+    classDef warn fill:#F1C40F22,stroke:#F1C40F,color:#F1C40F,stroke-width:1px
+    classDef penalty fill:#E67E2222,stroke:#E67E22,color:#E67E22,stroke-width:1px
+    classDef suspend fill:#E74C3C22,stroke:#E74C3C,color:#E74C3C,stroke-width:1px
+    classDef exclude fill:#E74C3C44,stroke:#E74C3C,color:#E74C3C,stroke-width:2px

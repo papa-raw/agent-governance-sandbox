@@ -8174,6 +8174,98 @@
           ]
         ]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "nearshore-posidonia-west",
+        "zone": "nearshore",
+        "name": "Herbier de Posidonie Ouest",
+        "area_ha": 4200,
+        "description": "Posidonia oceanica seagrass meadow off the western Camargue coast. Keystone Mediterranean habitat, fish nursery, and carbon sink under Parc naturel marin du Golfe du Lion governance."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [4.22, 43.442],
+            [4.26, 43.436],
+            [4.30, 43.432],
+            [4.34, 43.425],
+            [4.37, 43.418],
+            [4.40, 43.412],
+            [4.42, 43.406],
+            [4.44, 43.400],
+            [4.47, 43.394],
+            [4.50, 43.390],
+            [4.53, 43.386],
+            [4.56, 43.380],
+            [4.59, 43.375],
+            [4.62, 43.372],
+            [4.65, 43.368],
+            [4.68, 43.364],
+            [4.70, 43.361],
+            [4.72, 43.358],
+            [4.73, 43.350],
+            [4.71, 43.346],
+            [4.68, 43.342],
+            [4.65, 43.344],
+            [4.62, 43.348],
+            [4.58, 43.352],
+            [4.55, 43.356],
+            [4.51, 43.362],
+            [4.48, 43.367],
+            [4.44, 43.373],
+            [4.40, 43.380],
+            [4.36, 43.387],
+            [4.32, 43.394],
+            [4.28, 43.402],
+            [4.25, 43.410],
+            [4.23, 43.418],
+            [4.21, 43.426],
+            [4.20, 43.434],
+            [4.22, 43.442]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "estuary-grand-rhone",
+        "zone": "estuary",
+        "name": "Estuaire du Grand Rhône",
+        "area_ha": 1800,
+        "description": "Freshwater-saltwater mixing zone at the Grand Rhône river mouth. Critical for nutrient processing, eel migration, sole and sea bass nursery. Managed under Parc naturel marin du Golfe du Lion."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [4.815, 43.390],
+            [4.830, 43.383],
+            [4.842, 43.375],
+            [4.855, 43.368],
+            [4.870, 43.360],
+            [4.878, 43.352],
+            [4.882, 43.342],
+            [4.880, 43.332],
+            [4.873, 43.325],
+            [4.862, 43.320],
+            [4.848, 43.318],
+            [4.835, 43.320],
+            [4.822, 43.325],
+            [4.812, 43.332],
+            [4.805, 43.340],
+            [4.800, 43.350],
+            [4.798, 43.360],
+            [4.800, 43.370],
+            [4.805, 43.378],
+            [4.810, 43.385],
+            [4.815, 43.390]
+          ]
+        ]
+      }
     }
   ]
 }

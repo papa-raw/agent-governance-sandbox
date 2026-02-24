@@ -18,6 +18,12 @@
   --sacred-purple: #9B59B6;
   --stake-gold: #F1C40F;
   --commons-teal: #1ABC9C;
+
+  /* Ecosystem-specific accents */
+  --eco-carbon: #5DADE2;
+  --eco-water: #48C9B0;
+  --eco-bio: #58D68D;
+  --eco-flood: #85C1E9;
 }
 
 body {
@@ -34,3 +40,158 @@ body {
   height: 100vh;
   overflow: hidden;
 }
+
+/* ── Animations ── */
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(26, 188, 156, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(26, 188, 156, 0.4); }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out both;
+}
+
+.animate-glow {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+.animate-count-up {
+  animation: countUp 0.5s ease-out both;
+}
+
+/* Staggered children animation */
+.stagger-children > * {
+  animation: slideUp 0.4s ease-out both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+
+/* ── Glass morphism ── */
+
+.glass {
+  background: rgba(26, 35, 50, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(45, 63, 82, 0.6);
+}
+
+.glass-heavy {
+  background: rgba(15, 20, 25, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(45, 63, 82, 0.4);
+}
+
+/* ── Tab pill group ── */
+
+.tab-group {
+  display: flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--bg-base);
+  gap: 2px;
+}
+
+.tab-pill {
+  flex: 1;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  border: none;
+  background: transparent;
+  text-align: center;
+}
+
+.tab-pill:hover {
+  color: var(--text-primary);
+}
+
+.tab-pill.active {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+/* ── Metric card ── */
+
+.metric-card {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+}
+
+/* ── Recharts overrides ── */
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: var(--border);
+  stroke-opacity: 0.3;
+}
+
+.recharts-text {
+  fill: var(--text-secondary);
+  font-size: 9px;
+}
+
+/* ── Scrollbar ── */
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+

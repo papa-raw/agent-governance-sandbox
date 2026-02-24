@@ -238,4 +238,68 @@ const detectors: Record<string, Detector> = {
         : '',
     };
   },
+
+  ecosystem_service_collapse: (state) => {
+    // Compare current ecosystem service value to initial capacity
+    const territory = state.commons.territory;
+    const currentEcoValue = territory.totalEcosystemValue ?? 0;
+
+    // Estimate initial (full health) value from zone economics
+    let fullHealthValue = 0;
+    for (const zone of territory.zones) {
+      if (zone.economics) {
+        const areaHa = zone.properties.surface_ha;
+        const svc = zone.economics.servicesPerHa;
+        fullHealthValue += (
+          svc.carbonSequestration + svc.waterPurification + svc.floodRegulation +
+          svc.biodiversityHabitat + svc.fishNursery + svc.recreationCultural
+        ) * areaHa;
+      }
+    }
+
+    if (fullHealthValue === 0) return { severity: 0, evidence: '' };
+
+    const ratio = currentEcoValue / fullHealthValue;
+    // Severity increases as services decline. 50% remaining = trigger, 20% = critical
+    const severity = Math.max(0, Math.min(1, (0.8 - ratio) / 0.6));
+
+    return {
+      severity,
+      evidence: severity > 0.25
+        ? `Ecosystem services at ${(ratio * 100).toFixed(0)}% of full capacity (€${(currentEcoValue / 1_000_000).toFixed(1)}M / €${(fullHealthValue / 1_000_000).toFixed(1)}M/yr)`
+        : '',
+    };
+  },
+
+  green_asset_erosion: (state) => {
+    // Detect when ecosystem services decline faster than raw resources
+    // This means green asset backing is being destroyed even while commodity production holds
+    if (state.history.length < 3) return { severity: 0, evidence: '' };
+
+    const recent = state.history.slice(-5);
+    const first = recent[0];
+    const last = recent[recent.length - 1];
+
+    const resourceRatio = first.territorySnapshot.totalResources > 0
+      ? last.territorySnapshot.totalResources / first.territorySnapshot.totalResources
+      : 1;
+
+    const firstEco = first.territorySnapshot.totalEcosystemValue ?? 0;
+    const lastEco = last.territorySnapshot.totalEcosystemValue ?? 0;
+    const ecoRatio = firstEco > 0 ? lastEco / firstEco : 1;
+
+    // Erosion: eco declining faster than resources
+    const gap = resourceRatio - ecoRatio;
+    if (gap <= 0) return { severity: 0, evidence: '' };
+
+    // gap > 0.15 = trigger, gap > 0.3 = critical
+    const severity = Math.max(0, Math.min(1, gap / 0.3));
+
+    return {
+      severity,
+      evidence: severity > 0.25
+        ? `Ecosystem services declining ${(gap * 100).toFixed(0)}% faster than raw resources over last ${recent.length} rounds (resources: ${(resourceRatio * 100).toFixed(0)}%, services: ${(ecoRatio * 100).toFixed(0)}%)`
+        : '',
+    };
+  },
 };

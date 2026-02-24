@@ -1,0 +1,37 @@
+graph LR
+    subgraph GATE["Stake Gate"]
+        SG["🏦 Min 50 Stake\nto participate"]:::gate
+    end
+
+    subgraph VOTING["Stake-Weighted Voting"]
+        V["1 Resource = 1 Vote\n30% Quorum • Public Ballots"]:::voting
+    end
+
+    subgraph POWER["Power Structure"]
+        R["📜 Rules"]:::rules
+    end
+
+    W1["🐋 Whale Agent\n200 resources"]:::whale
+    W2["🐋 Whale Agent\n150 resources"]:::whale
+    S1["🐟 Small Agent\n60 resources"]:::small
+    S2["🐟 Small Agent\n40 resources"]:::excluded
+
+    W1 ==>|"200 votes"| V
+    W2 ==>|"150 votes"| V
+    S1 -.->|"60 votes"| V
+    S2 -.-x|"❌ below threshold"| SG
+
+    V ==>|"wealthy decide"| R
+
+    linkStyle 0 stroke:#F1C40F,stroke-width:4px
+    linkStyle 1 stroke:#F1C40F,stroke-width:3px
+    linkStyle 2 stroke:#8899AA,stroke-width:1px
+    linkStyle 3 stroke:#E74C3C,stroke-width:1px
+    linkStyle 4 stroke:#F1C40F,stroke-width:3px
+
+    classDef gate fill:#F1C40F22,stroke:#F1C40F,color:#F1C40F,stroke-width:2px
+    classDef voting fill:#243042,stroke:#F1C40F,color:#E8ECF1,stroke-width:2px
+    classDef rules fill:#1A2332,stroke:#8899AA,color:#E8ECF1,stroke-width:2px
+    classDef whale fill:#F1C40F33,stroke:#F1C40F,color:#F1C40F,stroke-width:2px
+    classDef small fill:#243042,stroke:#8899AA,color:#8899AA,stroke-width:1px
+    classDef excluded fill:#E74C3C22,stroke:#E74C3C,color:#E74C3C,stroke-width:1px,stroke-dasharray:5 5

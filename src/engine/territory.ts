@@ -1,5 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import type { Territory, TerritorialZone, LandUseCategory } from '../types';
+import { recomputeAllEconomics } from './ecosystem/economics';
 
 /**
  * Map GeoJSON zone types to our simulation land use categories.
@@ -15,6 +16,8 @@ const ZONE_TO_CATEGORY: Record<string, LandUseCategory> = {
   pasture: 'grassland',
   beach: 'coastal',
   coastal: 'coastal',
+  nearshore: 'nearshore',
+  estuary: 'estuary',
 };
 
 /**
@@ -30,6 +33,8 @@ const REGEN_RATES: Record<LandUseCategory, number> = {
   coastal: 0.4,            // Moderate — dune dynamics
   grassland: 0.5,          // Moderate — grazing pressure
   protected: 0.9,          // Highest — no extraction allowed
+  nearshore: 0.7,          // High — Posidonia recovery if undisturbed
+  estuary: 0.5,            // Moderate — depends on upstream river health
 };
 
 /**
@@ -50,7 +55,9 @@ export function buildTerritoryFromGeoJSON(geojson: GeoJSON.FeatureCollection): T
       category === 'forest' ? 1.2 :
       category === 'agriculture' ? 0.8 :
       category === 'salt_production' ? 0.6 :
-      category === 'urban' ? 0.2 : 1.0;
+      category === 'urban' ? 0.2 :
+      category === 'nearshore' ? 1.4 :
+      category === 'estuary' ? 1.3 : 1.0;
 
     const maxCapacity = Math.round(baseCapacity * categoryMultiplier);
 
@@ -79,7 +86,7 @@ export function buildTerritoryFromGeoJSON(geojson: GeoJSON.FeatureCollection): T
 
   const totalResources = zones.reduce((sum, z) => sum + z.resourceLevel, 0);
 
-  return {
+  const territory: Territory = {
     zones,
     totalResources,
     biodiversityIndex: computeInitialBiodiversity(zones),
@@ -87,6 +94,11 @@ export function buildTerritoryFromGeoJSON(geojson: GeoJSON.FeatureCollection): T
     sustainabilityScore: 100, // Pristine at start
     waterBalance: 0.5, // Balanced freshwater/saltwater
   };
+
+  // Compute initial ecosystem economics for every zone
+  recomputeAllEconomics(territory);
+
+  return territory;
 }
 
 /**

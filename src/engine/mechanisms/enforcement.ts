@@ -3,6 +3,8 @@ import type {
   GovernanceConfig,
   GovernanceEvent,
 } from '../../types';
+import { narrowCapabilities } from '../identity/agent-did';
+import { isUCANEnabled } from '../identity/ucan-validator';
 
 interface EnforcementResult {
   agents: AgentState[];
@@ -222,6 +224,14 @@ function escalateSanction(
         details: { agentId: agent.id, reason },
       });
       break;
+  }
+
+  // Narrow UCAN capabilities based on sanction severity
+  if (isUCANEnabled() && updatedAgent.identity) {
+    updatedAgent = {
+      ...updatedAgent,
+      identity: narrowCapabilities(updatedAgent.identity, level.action),
+    };
   }
 
   return { agent: updatedAgent, events };

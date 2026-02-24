@@ -1,5 +1,91 @@
 import { z } from 'zod';
 
+// ── Ecosystem Services Valuation ──
+
+export type EcosystemServiceType =
+  | 'carbonSequestration'
+  | 'waterPurification'
+  | 'floodRegulation'
+  | 'biodiversityHabitat'
+  | 'fishNursery'
+  | 'recreationCultural';
+
+export type GreenAssetClass =
+  | 'carbon_credit'
+  | 'biodiversity_credit'
+  | 'water_quality_certificate'
+  | 'ecosystem_service_payment';
+
+export interface EcosystemServices {
+  carbonSequestration: number;    // EUR/yr
+  waterPurification: number;
+  floodRegulation: number;
+  biodiversityHabitat: number;
+  fishNursery: number;
+  recreationCultural: number;
+}
+
+export interface ZoneEconomics {
+  commodityType: string;
+  commodityValuePerHa: number;       // EUR/ha/yr
+  totalCommodityValue: number;       // EUR/yr (scaled by health)
+  servicesPerHa: EcosystemServices;  // EUR/ha/yr at full health
+  currentServices: EcosystemServices; // EUR/yr scaled by health + neighbor bonus
+  totalEcosystemValue: number;       // sum of currentServices
+  totalValue: number;                // commodity + ecosystem
+  healthFactor: number;              // 0-1 resourceLevel/maxCapacity
+}
+
+export type ValueFlowType =
+  | 'extraction'
+  | 'contribution'
+  | 'externality'
+  | 'regeneration';
+
+export interface ValueFlow {
+  id: string;
+  round: number;
+  type: ValueFlowType;
+  agentId?: string;
+  sourceZoneId: string;
+  targetZoneId?: string;           // for externalities
+  commodityEUR: number;
+  ecosystemEUR: number;
+  netEUR: number;                  // commodityEUR - ecosystemEUR (extraction destroys services)
+  description: string;
+}
+
+export interface AgentAttribution {
+  agentId: string;
+  agentName: string;
+  totalExtractedEUR: number;
+  totalContributedEUR: number;
+  totalExternalityEUR: number;     // negative = damage, positive = benefit
+  netEcosystemImpactEUR: number;   // sum of all ecosystem effects
+  netEconomicImpactEUR: number;    // overall net
+}
+
+export interface GreenAssetPotential {
+  assetClass: GreenAssetClass;
+  label: string;
+  nativeUnit: string;              // tCO2e, ha-eq, m3-eq
+  pricePerUnit: number;            // EUR
+  totalUnitsAtFullHealth: number;
+  currentUnits: number;
+  lostUnits: number;
+  totalEUR: number;
+  currentEUR: number;
+  lostEUR: number;
+  sourceZoneIds: string[];
+}
+
+export interface TerritoryGreenAssets {
+  assets: GreenAssetPotential[];
+  totalAnnualPotentialEUR: number;
+  preservedPotentialEUR: number;
+  lostPotentialEUR: number;
+}
+
 // ── Territorial Zones (Camargue GeoJSON) ──
 
 export type LandUseCategory =
@@ -11,7 +97,9 @@ export type LandUseCategory =
   | 'urban'              // Settlements, infrastructure
   | 'coastal'            // Dunes, beach, shoreline
   | 'grassland'          // Grazing land (manades)
-  | 'protected';         // Natura 2000, reserves
+  | 'protected'          // Natura 2000, reserves
+  | 'nearshore'          // Posidonia seagrass, shallow marine
+  | 'estuary';           // Rhône river mouth mixing zone
 
 export interface TerritorialZone {
   id: string;
@@ -30,6 +118,7 @@ export interface TerritorialZone {
   harvestPressure: number;
   regenerationRate: number;    // modified by neighbor health
   adjacentZones: string[];     // computed from geometry adjacency
+  economics?: ZoneEconomics;   // EUR-denominated ecosystem service valuation
 }
 
 export interface Territory {
@@ -39,6 +128,13 @@ export interface Territory {
   giniCoefficient: number;        // resource inequality across agents
   sustainabilityScore: number;    // replenish rate vs. harvest rate
   waterBalance: number;           // freshwater/saltwater equilibrium
+  // Ecosystem economics (computed from zone economics)
+  totalCommodityValue?: number;       // EUR/yr across all zones
+  totalEcosystemValue?: number;       // EUR/yr across all zones
+  totalTerritorialCapital?: number;   // commodity + ecosystem EUR/yr
+  valueFlows?: ValueFlow[];           // current round's value transfer records
+  agentAttributions?: AgentAttribution[];
+  greenAssets?: TerritoryGreenAssets;
 }
 
 // ── Commons & Resources ──
@@ -59,13 +155,20 @@ export type AgentPersonality =
   | 'whale'
   | 'chaotic';
 
-/** Camargue stakeholder roles mapped to agent personalities */
+/** Camargue stakeholder roles — 12 archetypes representing 42+ real organizations */
 export type CamargueStakeholder =
-  | 'conservationist'    // Tour du Valat, PNR → cooperator
-  | 'rice_farmer'        // Large rice operations → whale
-  | 'salt_producer'      // Salins du Midi → strategic
-  | 'hunter'             // Seasonal hunters → free-rider
-  | 'tourism_developer'; // Tourism pressure → chaotic
+  | 'park_authority'       // PNRC coordination body → strategic
+  | 'conservationist'      // Tour du Valat + SNPN + WWF + LPO PACA → cooperator
+  | 'public_landowner'     // Conservatoire du Littoral + OFB (25,000 ha) → cooperator
+  | 'rice_farmer'          // SRFF + CFR + 160 rice farms → whale
+  | 'salt_producer'        // Salins Group (22,000 ha) → strategic
+  | 'rancher'              // Confrérie des Gardians + ~150 manades → cooperator
+  | 'fisher'               // Prud'homies de Pêche + aquaculture → strategic
+  | 'hunter'               // FDC 13 + local ACCAs (16,500 members) → free-rider
+  | 'tourism_developer'    // Tourism offices + private operators → chaotic
+  | 'municipality'         // Arles + Saintes-Maries + Port-Saint-Louis → strategic
+  | 'water_authority'      // Agence de l'Eau + SYMADREM + CEDE → cooperator
+  | 'regional_government'; // Région PACA + Département BdR → strategic
 
 export interface DelegationConfig {
   values: {
@@ -91,9 +194,44 @@ export interface Sanction {
   reputationCost?: number;
 }
 
+// ── UCAN / Agent Identity ──
+
+export type AttackVector =
+  | 'vote_spoof'
+  | 'privilege_escalation'
+  | 'ghost_write'
+  | 'history_tamper';
+
+export type AgentCapability =
+  | 'vote'
+  | 'propose'
+  | 'consume'
+  | 'contribute'
+  | 'store'
+  | 'enforce'
+  | 'modify_rules';
+
+export interface AgentIdentity {
+  did: string;                  // did:key:z6Mk... (Ed25519-derived)
+  publicKeyHex: string;
+  capabilities: AgentCapability[];
+  revoked: boolean;
+  mintedAt: string;
+}
+
+export interface CapabilityViolation {
+  attackVector: AttackVector;
+  attemptedBy: string;          // agent DID
+  attemptedAction: string;      // the rejected action type
+  rejectionReason: string;
+  agentId: string;
+  agentName: string;
+}
+
 export interface AgentState {
   id: string;
   name: string;
+  description: string;
   personality: AgentPersonality;
   stakeholder: CamargueStakeholder;
   resources: number;
@@ -108,6 +246,7 @@ export interface AgentState {
   suspendedUntilRound?: number;
   delegationConfig: DelegationConfig;
   managedZones: string[];       // zone IDs this agent stewards
+  identity?: AgentIdentity;
 }
 
 // ── Agent Actions ──
@@ -132,7 +271,9 @@ export type AgentActionType =
   | 'contribute'
   | 'propose_rule'
   | 'vote'
-  | 'abstain';
+  | 'abstain'
+  | 'enforce'
+  | 'modify_rules';
 
 export interface AgentAction {
   agentId: string;
@@ -151,7 +292,7 @@ export interface AgentAction {
 export type GovernanceConfigId =
   | 'tragedy'
   | 'ostrom'
-  | 'plutocratic'
+  | 'cybernetic'
   | 'adaptive';
 
 export interface BoundaryRules {
@@ -229,7 +370,8 @@ export type GovernanceEventType =
   | 'enforcement_check'
   | 'stake_slashed'
   | 'boundary_sealed'
-  | 'boundary_reopened';
+  | 'boundary_reopened'
+  | 'capability_violation';
 
 export interface GovernanceEvent {
   type: GovernanceEventType;
@@ -256,6 +398,32 @@ export interface FailureMode {
   cascadesTo: string[];         // failure mode IDs this can cause
 }
 
+// ── Ballot / Voting ──
+
+export interface BallotSummary {
+  proposalId: string;
+  proposalDescription: string;
+  totalVoters: number;
+  votesCast: number;
+  disclosureThreshold: number;   // 0-1
+  thresholdMet: boolean;
+  disclosed: boolean;
+  results?: {
+    yes: number;
+    no: number;
+    quorumMet: boolean;
+    votes: Array<{ agentId: string; vote: 'yes' | 'no' }>;
+  };
+  /** Lit Protocol seal on disclosed results (null if Lit unavailable) */
+  litSeal?: {
+    ciphertext: string;
+    dataToEncryptHash: string;
+    accessControlConditions: unknown[];
+    sealedAt: string;
+    network: string;
+  } | null;
+}
+
 // ── Rounds & Simulation ──
 
 export interface RoundResult {
@@ -269,11 +437,18 @@ export interface RoundResult {
     giniCoefficient: number;
     sustainabilityScore: number;
     waterBalance: number;
+    totalCommodityValue?: number;
+    totalEcosystemValue?: number;
+    totalTerritorialCapital?: number;
+    greenAssets?: TerritoryGreenAssets;
   };
+  valueFlows?: ValueFlow[];
+  agentAttributions?: AgentAttribution[];
   failureModes: FailureMode[];
-  replicatorPrediction?: number; // predicted cooperation rate
+  ballotSummary?: BallotSummary;  // threshold-disclosure voting result
+  replicatorPrediction?: number;  // predicted cooperation rate
   actualCooperationRate?: number;
-  cid?: string;                 // Storacha CID once persisted
+  cid?: string;                   // Storacha CID once persisted
 }
 
 export interface SimulationState {
@@ -322,7 +497,7 @@ export interface SimulationSummary {
 
 export const AgentActionSchema = z.object({
   agentId: z.string(),
-  type: z.enum(['consume', 'contribute', 'propose_rule', 'vote', 'abstain']),
+  type: z.enum(['consume', 'contribute', 'propose_rule', 'vote', 'abstain', 'enforce', 'modify_rules']),
   amount: z.number().optional(),
   targetZones: z.array(z.string()).optional(),
   proposal: z

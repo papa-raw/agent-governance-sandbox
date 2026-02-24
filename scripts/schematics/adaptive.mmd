@@ -1,0 +1,56 @@
+graph TB
+    subgraph EU["EU & National Framework"]
+        WFD["Water Framework\nDirective"]:::eu
+        N2K["Natura 2000\nBoundary Rules"]:::eu
+        DREAL["DREAL\nEnforcement"]:::eu
+    end
+
+    subgraph PNRC["PNRC Coordination"]
+        COPIL["COPIL\nSupermajority 66%\n70% Quorum"]:::pnrc
+        MED["Mediation &\nDeliberation"]:::pnrc
+    end
+
+    subgraph STAKE["Stakeholder Groups"]
+        CON["Conservation\nCoalition"]:::green
+        PROD["Primary\nProducers"]:::gold
+        GOV["Governance\nBodies"]:::blue
+        EXT["Extractive &\nServices"]:::grey
+    end
+
+    COM["Camargue Commons\n100,000+ ha"]:::commons
+
+    N2K -->|"boundaries"| COM
+    WFD -->|"min ecological flows"| COM
+    DREAL -->|"inspect & sanction"| STAKE
+    COPIL -->|"rules & allocation"| COM
+    MED -->|"3-round deliberation"| COPIL
+
+    CON -->|"propose"| COPIL
+    PROD -->|"propose"| COPIL
+    GOV -->|"propose"| COPIL
+    EXT -->|"vote"| COPIL
+
+    CON -->|"contribute"| COM
+    PROD -->|"extract 20% min return"| COM
+    EXT -->|"extract"| COM
+
+    linkStyle 0 stroke:#1ABC9C,stroke-width:2px
+    linkStyle 1 stroke:#3498DB,stroke-width:2px
+    linkStyle 2 stroke:#E74C3C,stroke-width:2px
+    linkStyle 3 stroke:#1ABC9C,stroke-width:2px
+    linkStyle 4 stroke:#9B59B6,stroke-width:2px
+    linkStyle 5 stroke:#2ECC71,stroke-width:1px
+    linkStyle 6 stroke:#F1C40F,stroke-width:1px
+    linkStyle 7 stroke:#3498DB,stroke-width:1px
+    linkStyle 8 stroke:#8899AA,stroke-width:1px
+    linkStyle 9 stroke:#2ECC71,stroke-width:2px
+    linkStyle 10 stroke:#F1C40F,stroke-width:2px
+    linkStyle 11 stroke:#8899AA,stroke-width:1px
+
+    classDef eu fill:#3498DB22,stroke:#3498DB,color:#3498DB,stroke-width:2px
+    classDef pnrc fill:#1ABC9C22,stroke:#1ABC9C,color:#1ABC9C,stroke-width:2px
+    classDef commons fill:#1A2332,stroke:#1ABC9C,color:#E8ECF1,stroke-width:2px
+    classDef green fill:#2ECC7122,stroke:#2ECC71,color:#2ECC71,stroke-width:1px
+    classDef gold fill:#F1C40F22,stroke:#F1C40F,color:#F1C40F,stroke-width:1px
+    classDef blue fill:#3498DB22,stroke:#3498DB,color:#3498DB,stroke-width:1px
+    classDef grey fill:#243042,stroke:#8899AA,color:#8899AA,stroke-width:1px
