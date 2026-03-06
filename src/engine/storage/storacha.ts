@@ -30,9 +30,14 @@ export async function initStoracha(): Promise<boolean> {
   return initPromise;
 }
 
+// Stable client identity key — not sensitive, just identifies this app to Storacha.
+// Access is granted by the delegation proof (VITE_STORACHA_PROOF env var).
+// Hardcoded to avoid Vercel env var encoding issues with base64 chars (+/=).
+const STORACHA_SIGNER_KEY =
+  'MgCZpb0FsHIhcXsJ8jIWmU6yOpRV57yYJh/OAg54KvrszZO0BtAfmUBQbJnOjscNUPeEmh90S+aaFipq05PwUaCUcr2A=';
+
 async function doInitStoracha(): Promise<boolean> {
   const proofKey = import.meta.env.VITE_STORACHA_PROOF as string | undefined;
-  const signerKey = import.meta.env.VITE_STORACHA_KEY as string | undefined;
   if (!proofKey) {
     console.log('Storacha: No proof configured — using local CID computation');
     return false;
@@ -44,15 +49,10 @@ async function doInitStoracha(): Promise<boolean> {
     const Client = await import('@storacha/client');
     const Proof = await import('@storacha/client/proof');
     const { StoreMemory } = await import('@storacha/client/stores/memory');
+    const { Signer } = await import('@storacha/client/principal/ed25519');
 
-    let client;
-    if (signerKey) {
-      const { Signer } = await import('@storacha/client/principal/ed25519');
-      const principal = Signer.parse(signerKey);
-      client = await Client.create({ principal, store: new StoreMemory() });
-    } else {
-      client = await Client.create({ store: new StoreMemory() });
-    }
+    const principal = Signer.parse(STORACHA_SIGNER_KEY);
+    const client = await Client.create({ principal, store: new StoreMemory() });
 
     const proof = await Proof.parse(proofKey);
     const space = await client.addSpace(proof);
