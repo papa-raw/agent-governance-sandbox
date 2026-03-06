@@ -109,13 +109,12 @@ npm run build        # production build
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `VITE_STORACHA_KEY` | No | — | Stable ed25519 signer key for Storacha BYOD |
-| `VITE_STORACHA_PROOF` | No | — | Base64 delegation proof for Storacha space |
 | `VITE_LIT_ENABLED` | No | `true` | Set `false` to disable Lit Protocol |
 | `VITE_UCAN_ENABLED` | No | `true` | Set `false` to disable UCAN enforcement |
-| `VITE_ANTHROPIC_API_KEY` | No | — | Anthropic API key for Claude-powered agents |
+| `VITE_OPENROUTER_API_KEY` | No | — | OpenRouter API key for Claude-powered agents |
+| `VITE_ANTHROPIC_API_KEY` | No | — | Anthropic API key (alternative to OpenRouter) |
 
-Without any env vars, the app runs with deterministic agent behavior, local pseudo-CIDs, and Shamir-only voting. Each integration activates independently.
+Storacha credentials are hardcoded (signer key + delegation proof for `ags-camargue-2026` space). Without LLM keys, agents use deterministic behavior. Each integration activates independently.
 
 ---
 
@@ -198,14 +197,6 @@ src/
 - **Replicator dynamics** — Evolutionary game theory predicting cooperation/defection equilibria
 - **Density-dependent regeneration** — Zone health affected by neighbor health (Janssen spatial commons)
 - **REA value flows** — Resources-Events-Agents accounting tracking EUR value creation and destruction
-
-## Intellectual Lineage
-
-| Source | Contribution | Relationship |
-|--------|-------------|-------------|
-| **AI Mechanism Design Atlas** (aidesignatlas.xyz) | 33 mechanisms, 26 failure modes, Ostrom commons governance | Published research. Mechanism definitions inform simulation rules. |
-| **Endosphere** (essay) | Sloterdijk spherology applied to crypto co-immunity | Philosophical grounding. No code. |
-| **Topocurrencies** (research) | Spatial governance, agent coordination | Research context. No code reuse. |
 
 ## License
 
