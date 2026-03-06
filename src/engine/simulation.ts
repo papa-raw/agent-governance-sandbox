@@ -209,6 +209,13 @@ export async function executeRound(
     }
   }
 
+  // Step 5b: Update stakes — agents lock a fraction of resources as skin-in-the-game
+  for (const agent of updatedAgents) {
+    if (agent.excluded) continue;
+    // Stake = 20% of current resources, so active agents build stake naturally
+    agent.stake = Math.round(agent.resources * 0.2);
+  }
+
   // Step 6: Regenerate territory (density-dependent)
   // Snapshot pre-regen levels for ValueFlow computation
   const preRegenLevels = new Map(updatedTerritory.zones.map((z) => [z.id, z.resourceLevel]));

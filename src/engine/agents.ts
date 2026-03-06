@@ -290,7 +290,7 @@ export function createCamargueAgents(customTemplates?: AgentTemplate[]): AgentSt
     stakeholder: template.stakeholder,
     resources: template.startingResources,
     reputation: template.startingReputation,
-    stake: 0,
+    stake: Math.round(template.startingResources * 0.2),
     sanctions: [],
     sanctionLevel: 0,
     contributionHistory: [],
