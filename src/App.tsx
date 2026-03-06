@@ -7,6 +7,8 @@ import { SimulationControls } from './components/SimulationControls';
 import { IntroPanel } from './components/IntroPanel';
 import { RoundTransition } from './components/RoundTransition';
 import { DocsModal } from './components/DocsModal';
+import { SimulationResults } from './components/SimulationResults';
+import { CIDExplorer } from './components/CIDExplorer';
 import {
   GlobeHemisphereWest,
   MapPin,
@@ -45,6 +47,10 @@ function App() {
   const [showTransition, setShowTransition] = useState(false);
   const [showDocs, setShowDocs] = useState(false);
   const [docsSection, setDocsSection] = useState<string | undefined>(undefined);
+  const [showResults, setShowResults] = useState(false);
+  const [showCIDExplorer, setShowCIDExplorer] = useState(false);
+  // Counter that triggers re-render when Storacha/Lit finish initializing
+  const [, setInfraReady] = useState(0);
 
   const dismissTransition = useCallback(() => setShowTransition(false), []);
 
@@ -64,8 +70,8 @@ function App() {
     setSimulation({ ...sim, status: 'running' });
 
     // Lazy-init Storacha + Lit Protocol (non-blocking — available by first round/vote)
-    initStoracha().catch(() => {});
-    initLit().catch(() => {});
+    initStoracha().then(() => setInfraReady(v => v + 1)).catch(() => {});
+    initLit().then(() => setInfraReady(v => v + 1)).catch(() => {});
   };
 
   const stepRound = async () => {
@@ -87,6 +93,10 @@ function App() {
         : state;
       setSimulation(finalState);
       setShowTransition(true);
+      // Show results panel when simulation ends
+      if (finalState.status === 'completed' || finalState.status === 'collapsed') {
+        setShowResults(true);
+      }
     } catch (error) {
       console.error('Year execution failed:', error);
     } finally {
@@ -124,6 +134,10 @@ function App() {
         setSimulation(currentState);
       }
       setShowTransition(true);
+      // Show results panel when simulation ends
+      if (currentState.status === 'completed' || currentState.status === 'collapsed') {
+        setShowResults(true);
+      }
     } catch (error) {
       console.error('Simulation run failed:', error);
     } finally {
@@ -287,9 +301,16 @@ function App() {
         </span>
         <span className="flex items-center gap-3">
           <button
-            onClick={() => { setDocsSection('infrastructure'); setShowDocs(true); }}
+            onClick={() => {
+              if (simulation?.history.length) {
+                setShowCIDExplorer(true);
+              } else {
+                setDocsSection('infrastructure');
+                setShowDocs(true);
+              }
+            }}
             className="flex items-center gap-1.5 hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-            title="Storacha — decentralized audit trail. Click for details."
+            title={simulation?.history.length ? 'View CID audit trail' : 'Storacha — decentralized audit trail. Click for details.'}
           >
             <HardDrives size={10} weight="bold" className="opacity-50" />
             <span className={`w-1.5 h-1.5 rounded-full ${isStorachaConnected() ? 'bg-[var(--governance-green)]' : 'bg-[var(--text-secondary)] opacity-40'}`} />
@@ -327,6 +348,29 @@ function App() {
       </footer>
 
       <DocsModal open={showDocs} onClose={() => { setShowDocs(false); setDocsSection(undefined); }} initialSection={docsSection as any} />
+
+      {/* Simulation results overlay */}
+      {showResults && simulation && (simulation.status === 'completed' || simulation.status === 'collapsed') && (
+        <SimulationResults
+          simulation={simulation}
+          onDismiss={() => {
+            setShowResults(false);
+            setSimulation(null);
+            setIsRunning(false);
+            clearPromptCache();
+          }}
+          onArchive={async (cid) => {
+            setSimulation(s => s ? { ...s, stateCID: cid } : null);
+          }}
+        />
+      )}
+
+      {/* CID Explorer modal */}
+      <CIDExplorer
+        open={showCIDExplorer}
+        onClose={() => setShowCIDExplorer(false)}
+        history={simulation?.history ?? []}
+      />
     </div>
   );
 }
