@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import type { AgentState, AgentAction, AgentAttribution, Territory, GovernanceConfig, FailureMode, RoundResult } from '../types';
 import { METHODOLOGY } from '../engine/ecosystem/economics';
 import type { LandUseCategory } from '../types';
+import { isUCANEnabled } from '../engine/identity/ucan-validator';
 import { EventsList, CommonsFooter, EVENT_ICONS } from './GovernanceTimeline';
 import { MetricsCharts, Sparkline } from './MetricsCharts';
 import {
@@ -26,6 +27,9 @@ import {
   CaretUp,
   Scroll,
   ChartLineUp,
+  Fingerprint,
+  Copy,
+  CheckCircle,
 } from '@phosphor-icons/react';
 
 const PERSONALITY_COLORS: Record<string, string> = {
@@ -429,7 +433,12 @@ function GovernanceTab({ governance, failureModes, history, agents }: {
         </div>
       )}
 
-      {/* 5. Sources footnote */}
+      {/* 5. Agent DID Registry (UCAN) */}
+      {isUCANEnabled() && agents && agents.some(a => a.identity) && (
+        <DIDRegistrySection agents={agents} history={history} />
+      )}
+
+      {/* 6. Sources footnote */}
       <div className="pt-1">
         <button
           onClick={() => setSourcesOpen(!sourcesOpen)}
@@ -521,6 +530,128 @@ function govEventSummary(type: string, details: Record<string, unknown>, agentMa
     case 'rule_changed': return 'Governance rule changed';
     default: return type.replace(/_/g, ' ');
   }
+}
+
+function DIDRegistrySection({ agents, history }: { agents: AgentState[]; history?: RoundResult[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const [copiedDID, setCopiedDID] = useState<string | null>(null);
+
+  // Compute violation counts per agent
+  const violationCounts = new Map<string, number>();
+  if (history) {
+    for (const round of history) {
+      for (const event of round.governanceEvents) {
+        if (event.type === 'capability_violation' && typeof event.details.agentId === 'string') {
+          const count = violationCounts.get(event.details.agentId) ?? 0;
+          violationCounts.set(event.details.agentId, count + 1);
+        }
+      }
+    }
+  }
+
+  const agentsWithIdentity = agents.filter(a => a.identity);
+  const activeCount = agentsWithIdentity.filter(a => !a.identity?.revoked).length;
+  const revokedCount = agentsWithIdentity.filter(a => a.identity?.revoked).length;
+
+  const handleCopyDID = (did: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(did).then(() => {
+      setCopiedDID(did);
+      setTimeout(() => setCopiedDID(null), 1500);
+    });
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-2 w-full text-left"
+      >
+        <Fingerprint size={12} weight="duotone" className="text-[var(--info-blue)]" />
+        <span className="text-[9px] font-semibold text-[var(--text-secondary)] uppercase tracking-widest flex-1">
+          Agent DID Registry
+        </span>
+        <span className="text-[9px] text-[var(--text-secondary)]">
+          <span className="text-[var(--governance-green)]">{activeCount}</span>
+          {revokedCount > 0 && (
+            <span className="text-[var(--danger-red)] ml-1">/ {revokedCount} revoked</span>
+          )}
+        </span>
+        {expanded ? <CaretUp size={10} className="text-[var(--text-secondary)]" /> : <CaretDown size={10} className="text-[var(--text-secondary)]" />}
+      </button>
+
+      {expanded && (
+        <div className="space-y-1.5 animate-slide-up">
+          {agentsWithIdentity.map(agent => {
+            const identity = agent.identity!;
+            const violations = violationCounts.get(agent.id) ?? 0;
+            const color = PERSONALITY_COLORS[agent.personality] ?? 'var(--text-secondary)';
+            const isCopied = copiedDID === identity.did;
+
+            return (
+              <div
+                key={agent.id}
+                className={`rounded-lg border p-2.5 ${
+                  identity.revoked
+                    ? 'border-[var(--danger-red)]/30 bg-[var(--danger-red)]/5 opacity-60'
+                    : 'border-[var(--border)] bg-[var(--bg-elevated)]'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: identity.revoked ? 'var(--danger-red)' : color }}
+                  />
+                  <span className="text-[11px] font-medium text-[var(--text-primary)] flex-1">
+                    {agent.name}
+                  </span>
+                  {identity.revoked && (
+                    <span className="text-[8px] px-1.5 py-0.5 rounded bg-[var(--danger-red)]/15 text-[var(--danger-red)] font-medium">
+                      REVOKED
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-[9px] font-mono text-[var(--info-blue)] truncate flex-1">
+                    {identity.did}
+                  </span>
+                  <button
+                    onClick={(e) => handleCopyDID(identity.did, e)}
+                    className="p-1 rounded hover:bg-[var(--bg-base)] transition-colors"
+                    title="Copy DID"
+                  >
+                    {isCopied ? (
+                      <CheckCircle size={10} className="text-[var(--governance-green)]" />
+                    ) : (
+                      <Copy size={10} className="text-[var(--text-secondary)]" />
+                    )}
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-1 flex-wrap">
+                  {identity.capabilities.map(cap => (
+                    <span
+                      key={cap}
+                      className="text-[8px] px-1.5 py-0.5 rounded bg-[var(--info-blue)]/10 text-[var(--info-blue)]"
+                    >
+                      {cap}
+                    </span>
+                  ))}
+                </div>
+
+                {violations > 0 && (
+                  <div className="mt-1.5 pt-1.5 border-t border-[var(--border)] text-[9px] text-[var(--danger-red)]">
+                    {violations} violation{violations !== 1 ? 's' : ''}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function FailureModeIndicator({ mode, allModes }: { mode: FailureMode; allModes: FailureMode[] }) {

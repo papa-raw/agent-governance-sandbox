@@ -258,6 +258,7 @@ export function GovernanceTimeline({ history, agents }: Props) {
 
 function BallotViz({ ballot, agentMap }: { ballot: BallotSummary; agentMap: Map<string, string> }) {
   const [verifyState, setVerifyState] = useState<'idle' | 'verifying' | 'verified' | 'failed'>('idle');
+  const [showSealDetails, setShowSealDetails] = useState(false);
 
   if (!ballot || !ballot.totalVoters) return null;
 
@@ -352,30 +353,64 @@ function BallotViz({ ballot, agentMap }: { ballot: BallotSummary; agentMap: Map<
 
       {/* Lit Protocol seal indicator */}
       {ballot.litSeal ? (
-        <div className="flex items-center gap-1.5 mt-1.5 pt-1.5 border-t border-[var(--border)] flex-wrap">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--sacred-purple)]" />
-          <span className="text-[9px] text-[var(--sacred-purple)] font-medium">Sealed via Lit Network</span>
-          <span className="text-[8px] text-[var(--text-secondary)] font-mono" title={ballot.litSeal.ciphertext}>
-            {ballot.litSeal.dataToEncryptHash.slice(0, 16)}...
-          </span>
-          {isLitConnected() && (
-            <button
-              onClick={(e) => { e.stopPropagation(); handleVerify(); }}
-              disabled={verifyState === 'verifying'}
-              className={`ml-auto flex items-center gap-1 text-[8px] font-medium px-1.5 py-0.5 rounded transition-colors ${
-                verifyState === 'verified'
-                  ? 'bg-[var(--governance-green)]/20 text-[var(--governance-green)]'
-                  : verifyState === 'failed'
-                    ? 'bg-[var(--danger-red)]/20 text-[var(--danger-red)]'
-                    : 'bg-[var(--sacred-purple)]/10 text-[var(--sacred-purple)] hover:bg-[var(--sacred-purple)]/20'
-              }`}
-            >
-              <SealCheck size={9} weight="bold" />
-              {verifyState === 'verifying' ? 'Verifying...'
-                : verifyState === 'verified' ? 'Verified'
-                : verifyState === 'failed' ? 'Failed'
-                : 'Verify on Lit Network'}
-            </button>
+        <div className="mt-1.5 pt-1.5 border-t border-[var(--border)]">
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowSealDetails(!showSealDetails); }}
+            className="flex items-center gap-1.5 w-full text-left"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--sacred-purple)]" />
+            <span className="text-[9px] text-[var(--sacred-purple)] font-medium">Sealed via Lit Network</span>
+            <span className="text-[8px] text-[var(--text-secondary)] font-mono" title={ballot.litSeal.ciphertext}>
+              {ballot.litSeal.dataToEncryptHash.slice(0, 16)}...
+            </span>
+            <CaretDown size={8} className={`ml-auto text-[var(--text-secondary)] transition-transform ${showSealDetails ? 'rotate-180' : ''}`} />
+          </button>
+
+          {showSealDetails && (
+            <div className="mt-2 p-2.5 rounded-lg bg-[var(--bg-base)] border border-[var(--sacred-purple)]/20 animate-slide-up">
+              <div className="grid grid-cols-2 gap-2 text-[9px]">
+                <div>
+                  <span className="text-[var(--text-secondary)]">Network</span>
+                  <div className="font-mono text-[var(--sacred-purple)]">{ballot.litSeal.network ?? 'nagaDev'}</div>
+                </div>
+                <div>
+                  <span className="text-[var(--text-secondary)]">Sealed</span>
+                  <div className="font-mono text-[var(--text-primary)]">
+                    {ballot.litSeal.sealedAt ? new Date(ballot.litSeal.sealedAt).toLocaleTimeString() : '—'}
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-[var(--text-secondary)]">Data Hash</span>
+                  <div className="font-mono text-[var(--text-primary)] truncate" title={ballot.litSeal.dataToEncryptHash}>
+                    {ballot.litSeal.dataToEncryptHash}
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-[var(--text-secondary)]">Access Control</span>
+                  <div className="font-mono text-[var(--info-blue)]">evmBasic (always-true demo)</div>
+                </div>
+              </div>
+
+              {isLitConnected() && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleVerify(); }}
+                  disabled={verifyState === 'verifying'}
+                  className={`mt-2.5 w-full flex items-center justify-center gap-1.5 text-[9px] font-medium px-2 py-1.5 rounded transition-colors ${
+                    verifyState === 'verified'
+                      ? 'bg-[var(--governance-green)]/20 text-[var(--governance-green)]'
+                      : verifyState === 'failed'
+                        ? 'bg-[var(--danger-red)]/20 text-[var(--danger-red)]'
+                        : 'bg-[var(--sacred-purple)]/15 text-[var(--sacred-purple)] hover:bg-[var(--sacred-purple)]/25'
+                  }`}
+                >
+                  <SealCheck size={11} weight="bold" />
+                  {verifyState === 'verifying' ? 'Verifying on Lit Network...'
+                    : verifyState === 'verified' ? 'Seal Verified'
+                    : verifyState === 'failed' ? 'Verification Failed'
+                    : 'Verify on Lit Network'}
+                </button>
+              )}
+            </div>
           )}
         </div>
       ) : ballot.disclosed ? (
