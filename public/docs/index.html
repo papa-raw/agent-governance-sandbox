@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Governance Sandbox — Documentation</title>
+<meta name="description" content="Configure AI delegates. Watch your commons thrive or collapse — in euros.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0a0a1a;
+    --bg-card: #12122a;
+    --bg-card-hover: #1a1a3a;
+    --border: #1e1e3e;
+    --border-accent: #2a2a4e;
+    --teal: #4ECDC4;
+    --teal-dim: rgba(78, 205, 196, 0.15);
+    --amber: #F0E68C;
+    --amber-dim: rgba(240, 230, 140, 0.12);
+    --red: #FF6B6B;
+    --red-dim: rgba(255, 107, 107, 0.12);
+    --white: #EAEAEA;
+    --gray: #8888AA;
+    --gray-dim: #555577;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: 'JetBrains Mono', 'SF Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-accent) var(--bg);
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--white);
+    line-height: 1.7;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Nav ── */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    background: rgba(10, 10, 26, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  nav .logo {
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+  }
+  nav .logo .teal { color: var(--teal); }
+  nav .links { display: flex; gap: 1.5rem; }
+  nav .links a {
+    color: var(--gray);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  nav .links a:hover { color: var(--teal); }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 8rem 2rem 4rem;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .badge {
+    display: inline-block;
+    padding: 0.3rem 0.9rem;
+    border: 1px solid var(--teal);
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--teal);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 .accent { color: var(--teal); }
+  .hero .sub {
+    font-size: 1.1rem;
+    color: var(--gray);
+    max-width: 620px;
+    margin: 0 auto 2rem;
+    line-height: 1.65;
+  }
+  .hero .tagline {
+    font-size: 1.3rem;
+    color: var(--amber);
+    font-weight: 500;
+    margin-bottom: 2.5rem;
+  }
+
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+  }
+  .stat .num {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--teal);
+    font-family: var(--mono);
+  }
+  .stat .label {
+    font-size: 0.78rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 0.2rem;
+  }
+
+  /* ── Sections ── */
+  section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+  }
+  section + section { border-top: 1px solid var(--border); }
+
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 0.75rem;
+  }
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 1rem;
+  }
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .section-desc {
+    color: var(--gray);
+    font-size: 1rem;
+    max-width: 640px;
+    margin-bottom: 2rem;
+  }
+
+  /* ── Cards Grid ── */
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .card:hover {
+    border-color: var(--border-accent);
+    background: var(--bg-card-hover);
+  }
+  .card .icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+  .card .icon.teal { background: var(--teal-dim); }
+  .card .icon.amber { background: var(--amber-dim); }
+  .card .icon.red { background: var(--red-dim); }
+  .card h3 { margin-bottom: 0.5rem; }
+  .card p {
+    font-size: 0.88rem;
+    color: var(--gray);
+    line-height: 1.6;
+  }
+  .card.full { grid-column: 1 / -1; }
+
+  /* ── Agent Table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+  }
+  th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gray);
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-accent);
+  }
+  td {
+    padding: 0.75rem 1rem;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--white);
+  }
+  td .mono {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--teal);
+  }
+  tr:hover td { background: rgba(78, 205, 196, 0.03); }
+
+  /* ── Governance Presets ── */
+  .presets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .preset {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+  }
+  .preset:hover { border-color: var(--border-accent); }
+  .preset .preset-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+  }
+  .preset .preset-desc {
+    font-size: 0.85rem;
+    color: var(--gray);
+    line-height: 1.55;
+    margin-bottom: 0.6rem;
+  }
+  .preset .preset-outcome {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .preset .preset-outcome.red { background: var(--red-dim); color: var(--red); }
+  .preset .preset-outcome.teal { background: var(--teal-dim); color: var(--teal); }
+  .preset .preset-outcome.amber { background: var(--amber-dim); color: var(--amber); }
+
+  /* ── Sponsor Sections ── */
+  .sponsor-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .sponsor-header .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--teal);
+  }
+  .sponsor-header .dot.amber { background: var(--amber); }
+
+  /* ── Code Block ── */
+  .code-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+  }
+  .code-block code {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--gray);
+    line-height: 1.7;
+    white-space: pre;
+  }
+  .code-block .kw { color: var(--teal); }
+  .code-block .str { color: var(--amber); }
+  .code-block .comment { color: var(--gray-dim); }
+
+  /* ── Architecture Diagram ── */
+  .arch {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    overflow-x: auto;
+  }
+  .arch pre {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--gray);
+    white-space: pre;
+  }
+  .arch pre .hl { color: var(--teal); font-weight: 500; }
+  .arch pre .am { color: var(--amber); }
+  .arch pre .rd { color: var(--red); }
+
+  /* ── Pipeline Flow ── */
+  .flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin: 1.5rem 0;
+  }
+  .flow-step {
+    flex: 1;
+    min-width: 120px;
+    padding: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .flow-step:first-child { border-radius: 12px 0 0 12px; }
+  .flow-step:last-child { border-radius: 0 12px 12px 0; }
+  .flow-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 8px solid var(--border-accent);
+    z-index: 1;
+  }
+  .flow-step h4 {
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+  .flow-step p {
+    font-size: 0.75rem;
+    color: var(--gray);
+    line-height: 1.45;
+  }
+
+  /* ── Glow ── */
+  .glow-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--teal), transparent);
+    opacity: 0.3;
+    margin: 3rem auto;
+    max-width: 400px;
+  }
+
+  /* ── Footer ── */
+  footer {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  footer .left { color: var(--gray); font-size: 0.85rem; }
+  footer .left a { color: var(--teal); text-decoration: none; }
+  footer .right { display: flex; gap: 1.5rem; }
+  footer .right a {
+    color: var(--gray);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+  }
+  footer .right a:hover { color: var(--teal); }
+
+  /* ── Responsive ── */
+  @media (max-width: 700px) {
+    .hero h1 { font-size: 2rem; }
+    .cards, .presets { grid-template-columns: 1fr; }
+    .flow { flex-direction: column; }
+    .flow-step { border-radius: 0 !important; }
+    .flow-step:first-child { border-radius: 12px 12px 0 0 !important; }
+    .flow-step:last-child { border-radius: 0 0 12px 12px !important; }
+    .flow-step::after { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Agent <span class="teal">Governance</span> Sandbox</div>
+  <div class="links">
+    <a href="#territory">Territory</a>
+    <a href="#governance">Governance</a>
+    <a href="#storacha">Storacha</a>
+    <a href="#lit">Lit Protocol</a>
+    <a href="#architecture">Architecture</a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <div class="badge">PL_Genesis: Frontiers of Collaboration &mdash; Fresh Code</div>
+  <h1>Agent <span class="accent">Governance</span> Sandbox</h1>
+  <p class="tagline">Configure AI delegates. Watch your commons thrive or collapse &mdash; in euros.</p>
+  <p class="sub">
+    A geoprospective governance simulator where five AI agents govern the Camargue
+    UNESCO Biosphere Reserve under four institutional configurations.
+    Every decision, vote, sanction, and territorial outcome is auditable, content-addressed, and EUR-denominated.
+  </p>
+  <div class="stats">
+    <div class="stat">
+      <div class="num">19</div>
+      <div class="label">Territory Zones</div>
+    </div>
+    <div class="stat">
+      <div class="num">5</div>
+      <div class="label">AI Agents</div>
+    </div>
+    <div class="stat">
+      <div class="num">4</div>
+      <div class="label">Governance Models</div>
+    </div>
+    <div class="stat">
+      <div class="num">8</div>
+      <div class="label">Failure Modes</div>
+    </div>
+  </div>
+</div>
+
+<div class="glow-line"></div>
+
+<!-- ── Problem ── -->
+<section>
+  <div class="section-label">The Problem</div>
+  <h2>Governance Decisions Made Blind</h2>
+  <p class="section-desc">
+    Multi-agent AI systems need governance, but there is no way to test which frameworks actually prevent
+    commons collapse. Tragedy of the commons, Ostrom's principles, quadratic voting &mdash; debated in theory,
+    never stress-tested with autonomous agents on real territorial data with real economic stakes.
+  </p>
+</section>
+
+<!-- ── Territory ── -->
+<section id="territory">
+  <div class="section-label">Demo Region</div>
+  <h2>Camargue, France</h2>
+  <p class="section-desc">
+    101,200 hectares of UNESCO Biosphere Reserve. Rice farmers, salt producers, conservationists,
+    hunters, and tourism developers fighting over shared water and land. Zone economics calibrated
+    to actual production data.
+  </p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="icon amber">&#8364;</div>
+      <h3>360&ndash;610M EUR/yr</h3>
+      <p>Commodity production value across 19 zones: rice, salt, aquaculture, tourism, grazing. Calibrated from FranceAgriMer data.</p>
+    </div>
+    <div class="card">
+      <div class="icon teal">&#127795;</div>
+      <h3>2.3B EUR/yr</h3>
+      <p>Ecosystem service value: carbon sequestration, water filtration, biodiversity habitat, flood protection, pollination, recreation. TEEB + Brander 2013 + EU ETS.</p>
+    </div>
+  </div>
+
+  <h3 style="margin: 2.5rem 0 1rem;">Five AI Agent Delegates</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Agent</th>
+        <th>Stakeholder</th>
+        <th>Personality</th>
+        <th>Role</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Tour du Valat</strong></td>
+        <td>Conservationist</td>
+        <td><span class="mono">cooperator</span></td>
+        <td>Protects wetlands, lagoons, Natura 2000 areas</td>
+      </tr>
+      <tr>
+        <td><strong>Riziculteurs du Delta</strong></td>
+        <td>Rice Farmer</td>
+        <td><span class="mono">whale</span></td>
+        <td>Dominates water allocation for irrigation</td>
+      </tr>
+      <tr>
+        <td><strong>Salins du Midi</strong></td>
+        <td>Salt Producer</td>
+        <td><span class="mono">strategic</span></td>
+        <td>Manages salt ponds, negotiates water balance</td>
+      </tr>
+      <tr>
+        <td><strong>Chasseurs de Camargue</strong></td>
+        <td>Hunter</td>
+        <td><span class="mono">free-rider</span></td>
+        <td>Extracts from marshland without contributing</td>
+      </tr>
+      <tr>
+        <td><strong>Saintes-Maries Tourisme</strong></td>
+        <td>Tourism Developer</td>
+        <td><span class="mono">chaotic</span></td>
+        <td>Unpredictable coastal development pressure</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ── Governance ── -->
+<section id="governance">
+  <div class="section-label">Governance Models</div>
+  <h2>Four Institutional Configurations</h2>
+  <p class="section-desc">
+    Each preset configures a complete governance stack: rules, voting, sanctions, regeneration dynamics,
+    failure detection. Users switch between them and watch what happens.
+  </p>
+
+  <div class="presets">
+    <div class="preset">
+      <div class="preset-name">Tragedy of the Commons</div>
+      <div class="preset-desc">No rules. Open access. Pure self-interest. Each agent maximizes extraction without coordination.</div>
+      <span class="preset-outcome red">Collapse in ~12 rounds</span>
+    </div>
+    <div class="preset">
+      <div class="preset-name">Ostrom Commons</div>
+      <div class="preset-desc">Boundary rules, contribution requirements, graduated sanctions, threshold-disclosure voting. Nobel-winning design principles.</div>
+      <span class="preset-outcome teal">Sustainable with enforcement</span>
+    </div>
+    <div class="preset">
+      <div class="preset-name">Cybernetic DAO</div>
+      <div class="preset-desc">Quadratic stake-weighted voting, dual-gated entry, stake slashing, 3-round deliberation, adaptive feedback loops.</div>
+      <span class="preset-outcome amber">Self-regulation via feedback</span>
+    </div>
+    <div class="preset">
+      <div class="preset-name">Camargue Real-World</div>
+      <div class="preset-desc">Mirrors actual PNRC / Natura 2000 institutional architecture governing the Camargue since 1970.</div>
+      <span class="preset-outcome teal">Institutional mediation</span>
+    </div>
+  </div>
+
+  <h3 style="margin: 2.5rem 0 1rem;">Round Loop</h3>
+
+  <div class="flow">
+    <div class="flow-step">
+      <h4>Observe</h4>
+      <p>Territory state, neighbor health</p>
+    </div>
+    <div class="flow-step">
+      <h4>Decide</h4>
+      <p>LLM or deterministic action</p>
+    </div>
+    <div class="flow-step">
+      <h4>Validate</h4>
+      <p>UCAN capability check</p>
+    </div>
+    <div class="flow-step">
+      <h4>Apply</h4>
+      <p>Effects on territory</p>
+    </div>
+    <div class="flow-step">
+      <h4>Enforce</h4>
+      <p>Sanctions, contribution checks</p>
+    </div>
+    <div class="flow-step">
+      <h4>Regenerate</h4>
+      <p>Density-dependent recovery</p>
+    </div>
+    <div class="flow-step">
+      <h4>Detect</h4>
+      <p>8 failure modes scored</p>
+    </div>
+  </div>
+
+  <div class="cards" style="margin-top: 1.5rem;">
+    <div class="card">
+      <div class="icon red">&#9888;</div>
+      <h3>8 Failure Mode Detectors</h3>
+      <p>Continuous severity (0-1) with cascade relationships. Resource depletion, institutional capture, free-riding,
+         inequality spiral, regulatory failure, coordination collapse, environmental degradation, trust erosion.</p>
+    </div>
+    <div class="card">
+      <div class="icon teal">&#8644;</div>
+      <h3>Replicator Dynamics</h3>
+      <p>Evolutionary game theory overlaying mathematical cooperation/defection predictions on actual agent behavior.
+         Shows where real behavior diverges from theoretical equilibria.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Storacha ── -->
+<section id="storacha">
+  <div class="section-label">Sponsor Integration</div>
+  <div class="sponsor-header">
+    <div class="dot"></div>
+    <h2>Storacha &mdash; Governance Memory + UCAN Enforcement</h2>
+  </div>
+  <p class="section-desc">
+    Storacha is not just a storage backend. It is the governance enforcement infrastructure.
+  </p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="icon teal">&#9670;</div>
+      <h3>Content-Addressed Rounds</h3>
+      <p>Every simulation round uploads a <code>RoundResult</code> JSON to a provisioned Storacha space (<code>ags-camargue-2026</code>).
+         Each upload produces a real IPFS CID, gateway-verifiable at <code>{cid}.ipfs.storacha.link</code>.</p>
+    </div>
+    <div class="card">
+      <div class="icon teal">&#128274;</div>
+      <h3>UCAN Capability Scoping</h3>
+      <p>Every agent gets an ephemeral DID (<code>did:key:z6Mk...</code>) and scoped capabilities.
+         Basic agents can <code>vote</code> and <code>propose</code>. Governance bodies can also <code>enforce</code> and <code>modify_rules</code>.</p>
+    </div>
+    <div class="card">
+      <div class="icon red">&#9760;</div>
+      <h3>Adversarial Capability Testing</h3>
+      <p>Chaotic agents (20%/round) and free-riders (15%/round) attempt vote spoofing, privilege escalation,
+         ghost writes after exclusion, and history tampering. UCAN rejects every unauthorized action cryptographically.</p>
+    </div>
+    <div class="card">
+      <div class="icon amber">&#8600;</div>
+      <h3>Sanction-Driven Scope Narrowing</h3>
+      <p>Graduated sanctions narrow UCAN capabilities: warnings are reputation-only, penalties remove <code>propose</code>,
+         suspensions make agents read-only, exclusions revoke delegation entirely.</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <code><span class="comment">// UCAN capability enforcement</span>
+{
+  <span class="kw">"iss"</span>: <span class="str">"did:key:z6MkAgent..."</span>,
+  <span class="kw">"att"</span>: [
+    { <span class="kw">"can"</span>: <span class="str">"vote"</span>, <span class="kw">"with"</span>: <span class="str">"ags:camargue:round/*"</span> },
+    { <span class="kw">"can"</span>: <span class="str">"propose"</span>, <span class="kw">"with"</span>: <span class="str">"ags:camargue:zones/*"</span> }
+  ],
+  <span class="kw">"prf"</span>: [<span class="str">"bafyDelegation..."</span>]
+}
+
+<span class="comment">// Adversarial attempt → cryptographic rejection</span>
+<span class="rd">capability_violation</span>: {
+  <span class="kw">"agent"</span>: <span class="str">"Chasseurs de Camargue"</span>,
+  <span class="kw">"attempted"</span>: <span class="str">"enforce"</span>,
+  <span class="kw">"had"</span>: [<span class="str">"vote"</span>, <span class="str">"propose"</span>],
+  <span class="kw">"result"</span>: <span class="str">"REJECTED"</span>
+}</code>
+  </div>
+</section>
+
+<!-- ── Lit Protocol ── -->
+<section id="lit">
+  <div class="section-label">Sponsor Integration</div>
+  <div class="sponsor-header">
+    <div class="dot amber"></div>
+    <h2>Lit Protocol &mdash; Threshold Disclosure Voting</h2>
+  </div>
+  <p class="section-desc">
+    Three layers of cryptography: Shamir for per-ballot privacy, Lit MPC for result integrity,
+    Storacha for persistence. One CID proves all three.
+  </p>
+
+  <div class="flow">
+    <div class="flow-step">
+      <h4>1. Cast Vote</h4>
+      <p>Approve / reject / abstain</p>
+    </div>
+    <div class="flow-step">
+      <h4>2. Shamir Split</h4>
+      <p>split(ballot, n=5, t=3)</p>
+    </div>
+    <div class="flow-step">
+      <h4>3. Accumulate</h4>
+      <p>Shares in encrypted pool</p>
+    </div>
+    <div class="flow-step">
+      <h4>4. Threshold</h4>
+      <p>Reveal when majority met</p>
+    </div>
+  </div>
+  <div class="flow" style="margin-top: 0;">
+    <div class="flow-step">
+      <h4>5. Tally</h4>
+      <p>Simple | Super | Quadratic</p>
+    </div>
+    <div class="flow-step">
+      <h4>6. Lit MPC Seal</h4>
+      <p>litClient.encrypt() on Naga</p>
+    </div>
+    <div class="flow-step">
+      <h4>7. Storacha</h4>
+      <p>litSeal in RoundResult CID</p>
+    </div>
+    <div class="flow-step">
+      <h4>8. Verify</h4>
+      <p>litClient.decrypt() on demand</p>
+    </div>
+  </div>
+
+  <div class="cards" style="margin-top: 1.5rem;">
+    <div class="card full">
+      <h3>Why threshold disclosure matters</h3>
+      <p>If votes are public, strategic agents adjust behavior based on partial tallies. Encrypted voting prevents this.
+         Threshold disclosure (Braghieri, Bursztyn &amp; Fasnacht, NBER Working Paper 34827, Feb 2026) reveals ballots only
+         when the majority crosses a configurable threshold. This prevents strategic manipulation while preserving post-hoc accountability.
+         The Lit seal nested inside the Storacha CID means one content address proves both integrity and persistence.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Architecture ── -->
+<section id="architecture">
+  <div class="section-label">System Design</div>
+  <h2>Architecture</h2>
+
+  <div class="arch">
+    <pre>
+<span class="hl">src/engine/</span>
+  simulation.ts              <span class="am">Core round loop: validate > apply > enforce > regenerate > detect</span>
+  territory.ts               GeoJSON > Territory with density-dependent regeneration
+  agents.ts                  5 Camargue stakeholder agent factory
+
+  <span class="hl">governance/</span>
+    presets.ts               4 governance configuration presets
+
+  <span class="hl">mechanisms/</span>
+    validation.ts            Action validation against governance rules
+    effects.ts               Action application to agents and territory
+    enforcement.ts           Contribution checks, graduated sanctions
+    regeneration.ts          Density-dependent regeneration (Janssen spatial commons)
+    failure-modes.ts         <span class="rd">8 failure mode detectors with continuous severity</span>
+    replicator.ts            Replicator dynamics cooperation prediction
+    voting.ts                Quadratic tallying, threshold disclosure, Lit seal
+
+  <span class="hl">identity/</span>
+    agent-did.ts             Ephemeral DID generation (Ed25519)
+    ucan-validator.ts        <span class="am">UCAN capability enforcement + adversarial violation logging</span>
+
+  <span class="hl">storage/</span>
+    storacha.ts              <span class="am">Storacha SDK, BYOD upload, gateway retrieval, CID fallback</span>
+
+  <span class="hl">lit/</span>
+    client.ts                Lit Protocol nagaDev client, lazy-loaded
+    seal.ts                  <span class="am">Ballot sealing (encrypt) and verification (decrypt)</span>
+
+  <span class="hl">voting/</span>
+    threshold-disclosure.ts  Shamir SSS split/combine for per-ballot encryption
+
+  <span class="hl">llm/</span>
+    client.ts                Anthropic SDK wrapper (Claude Haiku 4.5)
+    prompts.ts               Per-agent system prompts from delegation configs
+    runtime.ts               LLM action generation with Zod validation + deterministic fallback</pre>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Layer</th>
+        <th>Technology</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Frontend</td><td><span class="mono">React 19, TypeScript, Vite</span></td></tr>
+      <tr><td>Map</td><td><span class="mono">MapLibre GL, react-map-gl</span> (Carto Dark Matter + ESRI satellite)</td></tr>
+      <tr><td>Styling</td><td><span class="mono">Tailwind CSS 4</span></td></tr>
+      <tr><td>Charts</td><td><span class="mono">Recharts</span></td></tr>
+      <tr><td>Storage</td><td><span class="mono">Storacha SDK</span> &mdash; real IPFS CIDs, gateway-verifiable</td></tr>
+      <tr><td>Identity</td><td><span class="mono">UCAN</span> &mdash; ephemeral DIDs, scoped capabilities</td></tr>
+      <tr><td>Encryption</td><td><span class="mono">Lit Protocol</span> &mdash; Naga MPC, BLS threshold encryption</td></tr>
+      <tr><td>Voting</td><td><span class="mono">shamir-secret-sharing</span> &mdash; per-ballot Shamir SSS</td></tr>
+      <tr><td>Spatial</td><td><span class="mono">@turf/turf</span></td></tr>
+      <tr><td>AI Agents</td><td><span class="mono">Anthropic SDK</span> (Claude Haiku 4.5) with Zod structured output</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ── Quick Start ── -->
+<section>
+  <div class="section-label">Developer Guide</div>
+  <h2>Quick Start</h2>
+
+  <div class="code-block">
+    <code><span class="comment"># Install and run</span>
+npm install
+npm run dev          <span class="comment"># localhost:5173</span>
+
+<span class="comment"># Build for production</span>
+npm run build</code>
+  </div>
+
+  <div class="cards" style="margin-top: 1.5rem;">
+    <div class="card full">
+      <h3>Environment Variables</h3>
+      <p style="font-family: var(--mono); font-size: 0.82rem; line-height: 2.2;">
+        VITE_STORACHA_KEY &mdash; Stable ed25519 key for Storacha BYOD pattern<br>
+        VITE_STORACHA_PROOF &mdash; Base64 delegation proof for Storacha space<br>
+        VITE_LIT_ENABLED &mdash; Set false to disable Lit Protocol (default: true)<br>
+        VITE_UCAN_ENABLED &mdash; Set false to disable UCAN enforcement (default: true)<br>
+        VITE_ANTHROPIC_API_KEY &mdash; Enable Claude-powered agent decisions
+      </p>
+      <p style="margin-top: 0.75rem;">Without any env vars, the app runs with deterministic agents, local pseudo-CIDs, and Shamir-only voting.
+         Each integration activates independently when its credentials are provided.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Submission ── -->
+<section>
+  <div class="section-label">Submission</div>
+  <h2>Track &amp; Classification</h2>
+
+  <div class="cards">
+    <div class="card">
+      <div class="icon teal">&#9881;</div>
+      <h3>Track</h3>
+      <p>AI &amp; Robotics + Infrastructure &amp; Digital Rights</p>
+    </div>
+    <div class="card">
+      <div class="icon teal">&#10029;</div>
+      <h3>Category</h3>
+      <p>Fresh Code &mdash; repo created Feb 17, 2026</p>
+    </div>
+    <div class="card">
+      <div class="icon teal">&#9670;</div>
+      <h3>Sponsor Bounties</h3>
+      <p>Storacha + Lit Protocol (NextGen AI Apps)</p>
+    </div>
+    <div class="card">
+      <div class="icon teal">&#9878;</div>
+      <h3>License</h3>
+      <p>MIT</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Intellectual Lineage ── -->
+<section>
+  <div class="section-label">Context</div>
+  <h2>Intellectual Lineage</h2>
+  <p class="section-desc">
+    This project draws from, but shares no code with, three existing works.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Source</th>
+        <th>Contribution</th>
+        <th>Relationship</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>AI Mechanism Design Atlas</strong><br><span style="color:var(--gray-dim); font-size: 0.8rem;">aidesignatlas.xyz</span></td>
+        <td>33 mechanisms, 26 failure modes, Ostrom commons governance</td>
+        <td>Published research. Mechanism definitions inform simulation rules.</td>
+      </tr>
+      <tr>
+        <td><strong>Endosphere</strong></td>
+        <td>Sloterdijk spherology applied to crypto co-immunity</td>
+        <td>Philosophical grounding. No code.</td>
+      </tr>
+      <tr>
+        <td><strong>Topocurrencies</strong></td>
+        <td>Spatial governance, agent coordination</td>
+        <td>Research context. No code reuse.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  <div class="left">Built by <a href="#">Ecofrontiers</a> for PL_Genesis 2026</div>
+  <div class="right">
+    <a href="#">GitHub</a>
+    <a href="https://aidesignatlas.xyz">AI Mech Atlas</a>
+  </div>
+</footer>
+
+</body>
+</html>
