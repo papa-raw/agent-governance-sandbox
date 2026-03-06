@@ -1,6 +1,6 @@
 import type { AgentAction, AgentState, SimulationState } from '../../types';
 import { AgentActionSchema } from '../../types';
-import { getClient, isLLMAvailable } from './client';
+import { getClient, isLLMAvailable, isOpenRouter } from './client';
 import { buildSystemPrompt, buildContextPrompt } from './prompts';
 
 /**
@@ -67,7 +67,7 @@ async function generateAgentAction(
 
   try {
     const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
+      model: isOpenRouter() ? 'anthropic/claude-haiku-4-5-20251001' : 'claude-haiku-4-5-20251001',
       max_tokens: 512,
       system: systemPrompt,
       messages: [{ role: 'user', content: contextPrompt }],
