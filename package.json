@@ -1,7 +1,10 @@
 {
-  "name": "ags-scaffold",
+  "name": "agent-governance-sandbox",
+  "description": "Geoprospective governance simulator: 5 AI agents govern the Camargue UNESCO Biosphere Reserve under 4 institutional configurations. Content-addressed, EUR-denominated.",
+  "homepage": "https://agent-governance-sandbox.vercel.app",
+  "repository": "papa-raw/agent-governance-sandbox",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
