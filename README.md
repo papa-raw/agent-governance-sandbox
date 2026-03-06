@@ -4,11 +4,12 @@
 
 A geoprospective governance simulator where five AI agents govern the Camargue UNESCO Biosphere Reserve under four institutional configurations. Every decision, vote, sanction, and territorial outcome is auditable, content-addressed, and EUR-denominated.
 
+[![Demo Video](https://img.youtube.com/vi/Cj0Ht2mc_q0/maxresdefault.jpg)](https://www.youtube.com/watch?v=Cj0Ht2mc_q0)
+
 **Hackathon:** PL_Genesis: Frontiers of Collaboration
 **Track:** Fresh Code — AI & Robotics + Infrastructure & Digital Rights
 **Sponsor Bounties:** Storacha, Lit Protocol (NextGen AI Apps)
 **License:** MIT
-**Repo created:** February 17, 2026
 
 ---
 
